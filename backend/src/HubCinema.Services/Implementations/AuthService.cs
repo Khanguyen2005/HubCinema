@@ -92,12 +92,16 @@ public class AuthService : IAuthService
             throw new UnauthorizedException("Invalid or expired refresh token.");
         }
 
-        // Rotate atomically: a single UPDATE flips RevokedAt only while it is still null, so of
-        // several concurrent requests sharing one token exactly one wins — a replayed/stolen
-        // refresh token can't be redeemed twice.
         var now = DateTime.UtcNow;
+
+        // Rotate inside one transaction. The conditional UPDATE flips RevokedAt only while the
+        // token is still un-revoked AND unexpired, so of several concurrent requests sharing one
+        // token exactly one wins (replay-safe) and expiry is enforced at redemption time. Issuing
+        // the replacement in the same transaction means we never revoke without re-issuing.
+        await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
         var revoked = await _db.RefreshTokens
-            .Where(t => t.Id == token.Id && t.RevokedAt == null)
+            .Where(t => t.Id == token.Id && t.RevokedAt == null && t.ExpiresAt > now)
             .ExecuteUpdateAsync(
                 s => s.SetProperty(t => t.RevokedAt, now).SetProperty(t => t.UpdatedAt, now),
                 cancellationToken);
@@ -107,7 +111,9 @@ public class AuthService : IAuthService
             throw new UnauthorizedException("Invalid or expired refresh token.");
         }
 
-        return await IssueTokensAsync(token.User, cancellationToken);
+        var response = await IssueTokensAsync(token.User, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return response;
     }
 
     public async Task LogoutAsync(RefreshRequest request, CancellationToken cancellationToken = default)

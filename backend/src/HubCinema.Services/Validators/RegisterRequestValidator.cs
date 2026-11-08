@@ -1,3 +1,4 @@
+using System.Text;
 using FluentValidation;
 using HubCinema.Services.Dtos.Auth;
 
@@ -24,7 +25,10 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
         RuleFor(x => x.Password)
             .NotEmpty()
             .MinimumLength(8)
-            .MaximumLength(100);
+            // BCrypt only uses the first 72 bytes of a password; cap it so no accepted password
+            // has a silently-ignored suffix (non-ASCII chars reach the limit in fewer characters).
+            .Must(password => password is not null && Encoding.UTF8.GetByteCount(password) <= 72)
+            .WithMessage("Password must be at most 72 bytes.");
 
         RuleFor(x => x.DateOfBirth!.Value)
             .LessThan(DateOnly.FromDateTime(DateTime.UtcNow))
