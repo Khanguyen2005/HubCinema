@@ -38,16 +38,22 @@ public class AppDbContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 
-    public override int SaveChanges()
+    // Override the overloads that carry acceptAllChangesOnSuccess: the parameterless
+    // SaveChanges()/SaveChangesAsync(...) delegate to these internally, so intercepting
+    // here guarantees the audit/soft-delete policy runs on EVERY save entry point
+    // (a caller using SaveChanges(bool) cannot bypass it).
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         ApplyAuditAndSoftDelete();
-        return base.SaveChanges();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default)
     {
         ApplyAuditAndSoftDelete();
-        return base.SaveChangesAsync(cancellationToken);
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
     private void ApplyAuditAndSoftDelete()

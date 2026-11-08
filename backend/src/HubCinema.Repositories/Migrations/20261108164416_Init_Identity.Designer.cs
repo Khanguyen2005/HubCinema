@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HubCinema.Repositories.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261108133546_Init_Identity")]
+    [Migration("20261108164416_Init_Identity")]
     partial class Init_Identity
     {
         /// <inheritdoc />
@@ -45,10 +45,10 @@ namespace HubCinema.Repositories.Migrations
                     b.Property<DateTime?>("RevokedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Token")
+                    b.Property<string>("TokenHash")
                         .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -58,7 +58,7 @@ namespace HubCinema.Repositories.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Token");
+                    b.HasIndex("TokenHash");
 
                     b.HasIndex("UserId");
 

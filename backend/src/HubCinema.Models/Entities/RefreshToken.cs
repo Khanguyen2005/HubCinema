@@ -12,7 +12,12 @@ public class RefreshToken : BaseEntity
 
     public User User { get; set; } = null!;
 
-    public string Token { get; set; } = null!;
+    /// <summary>
+    /// SHA-256 hash of the refresh token — never the raw value. The raw token is
+    /// returned to the client once at issue time; only its hash is persisted, so a
+    /// read-only DB compromise cannot reuse it. Look up tokens by this hash.
+    /// </summary>
+    public string TokenHash { get; set; } = null!;
 
     public DateTime ExpiresAt { get; set; }
 

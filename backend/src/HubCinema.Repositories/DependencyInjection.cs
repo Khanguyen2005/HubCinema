@@ -13,8 +13,15 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddDataAccess(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("Default")));
+        var connectionString = configuration.GetConnectionString("Default");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException(
+                "Connection string 'Default' is not configured. Set ConnectionStrings:Default in " +
+                "appsettings.Development.json (local) or an environment variable before starting the app.");
+        }
+
+        services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
         return services;
     }
