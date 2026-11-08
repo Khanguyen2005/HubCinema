@@ -28,12 +28,23 @@ public class ExceptionHandlingMiddleware
         catch (AppException ex)
         {
             _logger.LogWarning(ex, "Handled application exception: {Message}", ex.Message);
+            // Response already sent: can't rewrite status/headers, so rethrow instead of masking the original error.
+            if (context.Response.HasStarted)
+            {
+                throw;
+            }
+
             var errors = (ex as BadRequestException)?.Errors;
             await WriteAsync(context, ex.StatusCode, ApiResponse.Fail(ex.Message, errors));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception");
+            if (context.Response.HasStarted)
+            {
+                throw;
+            }
+
             await WriteAsync(context, StatusCodes.Status500InternalServerError,
                 ApiResponse.Fail("An unexpected error occurred."));
         }
