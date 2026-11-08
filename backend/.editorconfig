@@ -109,3 +109,10 @@ dotnet_naming_rule.constants_pascal.symbols = constant_symbol
 dotnet_naming_rule.constants_pascal.style = pascal_style
 dotnet_naming_symbols.constant_symbol.applicable_kinds = field
 dotnet_naming_symbols.constant_symbol.required_modifiers = const
+
+############################
+# Generated code
+############################
+# EF Core migrations are scaffolded — don't enforce hand-written style on them.
+[**/Migrations/*.cs]
+generated_code = true
