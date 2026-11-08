@@ -1,0 +1,31 @@
+<Project>
+
+  <!--
+    Directory.Build.props
+    MSBuild automatically imports this file for EVERY project at or below this
+    folder (all projects under backend/). Put shared build settings here so you
+    set the target framework, language version, etc. in ONE place instead of in
+    every .csproj. A project can still override any value locally.
+  -->
+
+  <PropertyGroup>
+    <!-- Target runtime + language -->
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+
+    <!-- Modern C# defaults -->
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Code quality: run analyzers + .editorconfig style checks during build -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+
+    <!--
+      Keep false for now so style issues are warnings, not build-breaking errors.
+      Flip to true once the codebase is clean to enforce zero-warning builds.
+    -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>

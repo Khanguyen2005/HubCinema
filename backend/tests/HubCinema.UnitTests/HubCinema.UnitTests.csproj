@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\HubCinema.Services\HubCinema.Services.csproj" />
+    <ProjectReference Include="..\..\src\HubCinema.Repositories\HubCinema.Repositories.csproj" />
+    <ProjectReference Include="..\..\src\HubCinema.Models\HubCinema.Models.csproj" />
+    <ProjectReference Include="..\..\src\HubCinema.Common\HubCinema.Common.csproj" />
+  </ItemGroup>
+
+</Project>

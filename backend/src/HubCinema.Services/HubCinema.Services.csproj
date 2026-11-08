@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\HubCinema.Repositories\HubCinema.Repositories.csproj" />
+    <ProjectReference Include="..\HubCinema.Models\HubCinema.Models.csproj" />
+    <ProjectReference Include="..\HubCinema.Common\HubCinema.Common.csproj" />
+  </ItemGroup>
+
+</Project>

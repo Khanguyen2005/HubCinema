@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/HubCinema.API/HubCinema.API.csproj" />
+    <Project Path="src/HubCinema.Common/HubCinema.Common.csproj" />
+    <Project Path="src/HubCinema.Models/HubCinema.Models.csproj" />
+    <Project Path="src/HubCinema.Repositories/HubCinema.Repositories.csproj" />
+    <Project Path="src/HubCinema.Services/HubCinema.Services.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/HubCinema.IntegrationTests/HubCinema.IntegrationTests.csproj" />
+    <Project Path="tests/HubCinema.UnitTests/HubCinema.UnitTests.csproj" />
+  </Folder>
+</Solution>

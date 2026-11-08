@@ -1,0 +1,29 @@
+#!/usr/bin/env sh
+#
+# pre-commit hook: scan STAGED changes for secrets with gitleaks.
+# Lives in .githooks/ (committed) and is activated via:
+#   git config core.hooksPath .githooks
+# so every clone of the repo gets the same protection (unlike .git/hooks,
+# which is local-only and never committed).
+
+# 1) Make sure gitleaks is available.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "[pre-commit] gitleaks is not on PATH -- cannot scan for secrets."
+  echo "             Install it, then commit again:"
+  echo "               winget install Gitleaks.Gitleaks   (Windows)"
+  echo "             If you JUST installed it, restart your terminal so PATH refreshes."
+  exit 1
+fi
+
+# 2) Scan only what is staged. Non-zero exit = a secret was found.
+gitleaks git --staged --redact
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "[pre-commit] COMMIT BLOCKED: gitleaks found a potential secret in staged changes."
+  echo "             - Move the secret into appsettings.Development.json (it is gitignored), or"
+  echo "             - Use an environment variable / secret store."
+  echo "             False positive? Add an allowlist entry in .gitleaks.toml."
+  exit 1
+fi
+
+exit 0

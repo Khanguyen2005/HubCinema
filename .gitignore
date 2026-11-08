@@ -1,0 +1,60 @@
+# ---------------------------------------------------------------------------
+# HubCinema V2 — mono-repo .gitignore (.NET backend + Node/React frontend)
+# ---------------------------------------------------------------------------
+
+# ===== .NET / backend =====
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/
+# Build results / publish
+[Dd]ebug/
+[Rr]elease/
+publish/
+*.dll
+*.pdb
+# EF / local tooling
+*.db
+*.db-shm
+*.db-wal
+
+# ===== Node / frontend =====
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+coverage/
+
+# ===== Secrets / environment =====
+# Keep committed: appsettings.json (base config, no secrets) + *.Example.json templates.
+# appsettings.Development.json holds DEV SECRETS directly -> never commit it.
+appsettings.Development.json
+
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+secrets.json
+
+# ===== Local-only dev docs =====
+# dev-docs/ holds process notes used only while developing (local).
+# Only docs/ is published to GitHub.
+dev-docs/
+
+# ===== Logs =====
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== OS / editor =====
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+# VS Code: keep shareable settings, ignore the rest if you add machine-specific ones
+# .vscode/
