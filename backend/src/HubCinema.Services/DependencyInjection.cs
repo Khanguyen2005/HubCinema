@@ -20,6 +20,10 @@ public static class DependencyInjection
             .Validate(
                 s => !string.IsNullOrWhiteSpace(s.SecretKey) && s.SecretKey.Length >= 32,
                 "Jwt:SecretKey is missing or shorter than 32 characters. Set it in appsettings.Development.json (local) or an environment variable.")
+            .Validate(s => !string.IsNullOrWhiteSpace(s.Issuer), "Jwt:Issuer must not be empty.")
+            .Validate(s => !string.IsNullOrWhiteSpace(s.Audience), "Jwt:Audience must not be empty.")
+            .Validate(s => s.AccessTokenMinutes > 0, "Jwt:AccessTokenMinutes must be greater than 0.")
+            .Validate(s => s.RefreshTokenDays > 0, "Jwt:RefreshTokenDays must be greater than 0.")
             .ValidateOnStart();
 
         services.AddScoped<IPasswordHasher, PasswordHasher>();
