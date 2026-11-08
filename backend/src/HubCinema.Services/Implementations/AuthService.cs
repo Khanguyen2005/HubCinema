@@ -26,7 +26,12 @@ public class AuthService : IAuthService
         var email = request.Email.Trim().ToLowerInvariant();
         var phone = request.PhoneNumber.Trim();
 
-        var exists = await _db.Users.AnyAsync(u => u.Email == email || u.PhoneNumber == phone, cancellationToken);
+        // Check against ALL users, soft-deleted included: the unique indexes span them too, so
+        // email/phone stay globally unique. Ignoring the global filter here turns a soft-deleted
+        // collision into a clean 409 instead of a unique-violation at save time.
+        var exists = await _db.Users
+            .IgnoreQueryFilters()
+            .AnyAsync(u => u.Email == email || u.PhoneNumber == phone, cancellationToken);
         if (exists)
         {
             throw new ConflictException("Email or phone number is already registered.");
@@ -43,7 +48,17 @@ public class AuthService : IAuthService
         };
 
         _db.Users.Add(user);
-        await _db.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation())
+        {
+            // Two concurrent registrations can both pass the pre-check; the unique index is the
+            // source of truth and rejects the loser. Surface it as a conflict, not a 500.
+            throw new ConflictException("Email or phone number is already registered.");
+        }
 
         return await IssueTokensAsync(user, cancellationToken);
     }
@@ -77,8 +92,21 @@ public class AuthService : IAuthService
             throw new UnauthorizedException("Invalid or expired refresh token.");
         }
 
-        // Rotate: revoke the presented token and issue a fresh pair (both saved together).
-        token.RevokedAt = DateTime.UtcNow;
+        // Rotate atomically: a single UPDATE flips RevokedAt only while it is still null, so of
+        // several concurrent requests sharing one token exactly one wins — a replayed/stolen
+        // refresh token can't be redeemed twice.
+        var now = DateTime.UtcNow;
+        var revoked = await _db.RefreshTokens
+            .Where(t => t.Id == token.Id && t.RevokedAt == null)
+            .ExecuteUpdateAsync(
+                s => s.SetProperty(t => t.RevokedAt, now).SetProperty(t => t.UpdatedAt, now),
+                cancellationToken);
+
+        if (revoked == 0)
+        {
+            throw new UnauthorizedException("Invalid or expired refresh token.");
+        }
+
         return await IssueTokensAsync(token.User, cancellationToken);
     }
 
